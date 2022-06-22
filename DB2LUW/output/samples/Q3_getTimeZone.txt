@@ -1,0 +1,7 @@
+
+COUNTRYCODE COUNTRYNAME                                        LAT                  LNG                  TIMEZONEID           DSTOFFSET GMTOFFSET
+----------- -------------------------------------------------- -------------------- -------------------- -------------------- --------- ---------
+US          United States                                        37.170500000000000 -121.755600000000000 America/Los_Angeles      -7.00     -8.00
+
+  1 record(s) selected.
+

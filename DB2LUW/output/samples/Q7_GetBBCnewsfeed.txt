@@ -1,0 +1,62 @@
+SELECT * FROM XMLTABLE('$result/rss/channel/item' PASSING XMLPARSE( DOCUMENT DB2XML.HTTPGETBLOB('http://feeds.bbci.co.uk/news/world/rss.xml?edition=uk','') ) as "result" COLUMNS title VARCHAR(128) PATH 'title' ) AS RESULT
+
+TITLE                                                                                                                           
+--------------------------------------------------------------------------------------------------------------------------------
+Anti-Mubarak protesters hit back                                                                                                
+Queensland survives Cyclone Yasi                                                                                                
+Danish cartoonist attacker guilty                                                                                               
+Mass rally on Yemen 'day of rage'                                                                                               
+Haiti's run-off candidates named                                                                                                
+Algeria emergency 'to be lifted'                                                                                                
+Nepal deadlock broken with new PM                                                                                               
+World food prices reach new high                                                                                                
+French minister's suicide queried                                                                                               
+Pakistan blasphemy repeal dropped                                                                                               
+Shell profits double to $18.6bn                                                                                                 
+News in Nepal is broadcast by lantern light                                                                                     
+New York extends smoking ban to parks and beaches                                                                               
+Rumsfeld defends US war in Iraq                                                                                                 
+Cyber war Geneva Conventions call                                                                                               
+Mexico jail inmate in Botox row                                                                                                 
+Chavez marks 12 years in office                                                                                                 
+Somali MPs extend their mandate                                                                                                 
+Rwanda planning vasectomy drive                                                                                                 
+Burma confirms leader candidates                                                                                                
+Gunmen kill five Thai villagers                                                                                                 
+Last Tango actress Schneider dies                                                                                               
+Pub TV football choice 'upheld'                                                                                                 
+Jordan names new PM amid protest                                                                                                
+Tunisia protests 'left 200 dead'                                                                                                
+Karachi police swoop on 'killers'                                                                                               
+Indian ex-minister Raja in court                                                                                                
+Britons on Cairo charter flight                                                                                                 
+Nanny admits tycoon poisoning bid                                                                                               
+Egypt 'hijacked Vodafone network'                                                                                               
+ECB 'closely monitoring' prices                                                                                                 
+Growing card use lifts Mastercard                                                                                               
+Carroll cool on Torres comparison                                                                                               
+Luiz relieved not to face Torres                                                                                                
+Kubica sets test pace for Renault                                                                                               
+Potter movies honoured by Bafta                                                                                                 
+Sculptures gifted to new gallery                                                                                                
+Fox set for German career award                                                                                                 
+Protester: Mubarak leaving would be 'fatal'                                                                                     
+Major white-outs in US and Canada                                                                                               
+Woman gives birth in midst of cyclone                                                                                           
+Cyclone wind 'like a freight train'                                                                                             
+Yemen 'day of rage' gathers momentum                                                                                            
+Deaths in renewed Cairo violence                                                                                                
+How to build a PC in four minutes                                                                                               
+Murdoch launches digital newspaper                                                                                              
+One-minute World News                                                                                                           
+Lost champion                                                                                                                   
+Dug in                                                                                                                          
+Financial muscle                                                                                                                
+Dying for change                                                                                                                
+Feeling the pinch                                                                                                               
+Breaking traditions                                                                                                             
+Hero's welcome?                                                                                                                 
+
+  54 record(s) selected.
+
+

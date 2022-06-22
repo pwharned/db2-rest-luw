@@ -1,0 +1,56 @@
+1. select * from table(db2xml.httpgetclobverbose('http://www.ibm.com','')) t;
+
+
+2. select * from table(db2xml.httpgetblobverbose('http://www.ibm.com','')) t;
+ 
+
+3. select * from table(db2xml.httpputclobverbose('http://localhost:8080/TomcatTest/hi.html','','hi RESTUDF')) t;
+
+
+4. select * from table(db2xml.httpputblobverbose('http://localhost:8080/TomcatTest/hiblob.html','',CAST('hi RESTUDF' AS BLOB(1K)))) t;
+
+
+5. SELECT * FROM table(DB2XML.HTTPDELETECLOBVERBOSE('http://localhost:8080/TomcatTest/hello.html','')) t
+
+
+6. SELECT * FROM table(DB2XML.HTTPDELETEBLOBVERBOSE('http://localhost:8080/TomcatTest/hi.html','')) t
+
+
+7. SELECT * from table(DB2XML.HTTPPOSTCLOBVERBOSE('http://www.webservicex.net//stockquote.asmx',
+CAST ('<httpHeader>
+       <header name="Content-Type" value="text/xml;charset=utf-8"/>
+       <header name="SOAPAction" value="&quot;http://www.webserviceX.NET/GetQuote&quot;"/>
+       </httpHeader>' AS CLOB(1K)),
+ CAST('<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+          <soap:Body>
+             <GetQuote xmlns="http://www.webserviceX.NET/">
+                <symbol>IBM</symbol>
+             </GetQuote>
+          </soap:Body>
+       </soap:Envelope>' AS CLOB(10K))
+) ) t;
+
+8. SELECT * from table(DB2XML.HTTPPOSTBLOBVERBOSE('http://www.webservicex.net//stockquote.asmx',
+CAST ('<httpHeader>
+       <header name="Content-Type" value="text/xml;charset=utf-8"/>
+       <header name="SOAPAction" value="&quot;http://www.webserviceX.NET/GetQuote&quot;"/>
+       </httpHeader>' AS CLOB(1K)),
+ CAST('<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+          <soap:Body>
+             <GetQuote xmlns="http://www.webserviceX.NET/">
+                <symbol>IBM</symbol>
+             </GetQuote>
+          </soap:Body>
+       </soap:Envelope>' AS BLOB(10K))
+) ) t;
+
+
+9. select * from table(db2xml.httpclobverbose('http://www.ibm.com','GET','','')) t;
+
+   select * from table(db2xml.httpClobVerbose('http://localhost:8080/TomcatTest/HI.html','PUT','','HIHI')) t;
+
+
+10. select * from table(db2xml.httpBlobVerbose('http://www.ibm.com','GET','',CAST(NULL AS BLOB(1K)))) t
+
+    select * from table(db2xml.httpBlobVerbose('http://localhost:8080/TomcatTest/HIputblob.html','PUT','',CAST('hihihi' AS BLOB(1K)))) t;
+
