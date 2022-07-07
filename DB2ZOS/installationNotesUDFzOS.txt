@@ -1,0 +1,203 @@
+Note: This document uses UTF-8 encoding. Please ensure that your viewing tool 
+      supports to properly read the document.
+
+
+1. General Requirements 
+=======================
+DB2 Version
+-----------
+The minimum DB2 level is version 8 with the latest PTFs installed. Most of the 
+examples provided in the article are using the XMLTABLE function to further
+process the HTTP response message. This function requires at least DB2 Version 9
+with the latest PTF levels.
+
+Java Version
+------------
+The DB2 HTTP/REST consumer functions are implemented in Java. The minimum JDK 
+level required is 1.4.2. It is recommended to use JDK 5.0 or above. Please see
+the instructions below for additional WLM/JVM settings.
+
+Internet connectivity
+---------------------
+You system needs proper TCP/IP setup for the REST UDFs to work. The examples 
+provided with the article require access to the Internet. 
+ 
+2. Configuration of the WLM environment
+=======================================
+The following section describes the appropriate WLM setup. Let's first take a 
+look at the different data sets and HFS files involved as well as some of the
+configuration settings required for the DB2 HTTP/REST consumer functions:
+
+Figure 1. Data Set and HFS file references
+--------------------------------------------------------------------------------
+ a) WLM startup procedure
+ ┌---------------------------------------------------
+ │ ...
+ │ //JAVAENV   DD    DSN=USER.WLMJAVA.JSPENV,DISP=SHR
+ │ ... │
+ │     │
+       └--> b) JAVAENV data set (USER.WLMJAVA.JSPENV)
+            ┌---------------------------------------------------
+            │ ENVAR("_CEE_ENVFILE=/wlmjvm/jspnolimit.txt"), XPLINK(ON)  
+            │ ...  │     
+            │      │
+                   └--> c) jspnolimit.txt
+                        ┌---------------------------------------------------
+                        │ CLASSPATH=/restUDF/restUDF.jar
+                        │ JVMPROPS=/wlmjvm/jvmprops.txt
+                        │ ... │
+                        │     │
+                              └--> d) jvmprops.txt
+                                ┌-----------------------------------------------
+                                │-Djavax.net.ssl.keyStore=/wlmjvm/keystore.jks
+                                │-Djavax.net.ssl.trustStore=/wlmjvm/keystore.jks
+                                │...
+                                │
+--------------------------------------------------------------------------------
+
+a) The WLM startup procedure
+----------------------------
+ JAVAENV DD:
+  The WLM startup procedure must contain a JAVAENV DD statement. This statement 
+  specifies a data set that contains Language Environment® runtime options for 
+  the routines that run in the stored procedure address space. The example in 
+  Figure 1 uses USER.WLMJAVA.JSPENV as the name. 
+
+ NOWLMENC DD:
+  If Java 5 or higher is used a NOWLMENC DD is required for the operation of the 
+  DB2 HTTP/REST user-defined functions. More information can be found here:
+  http://publib.boulder.ibm.com/infocenter/dzichelp/v2r2/topic/com.ibm.db2.doc.j
+  ava/db2z_javaroutinewlmstartupproc.htm
+  
+  You may also install APAR PK83379 which eliminates the need for NOWLMENC DD;
+  see: 
+  http://www-01.ibm.com/support/docview.wss?uid=swg1PK83379
+
+b) The JAVAENV data set
+-----------------------
+ The JAVAENV data set needs to be created with the following options:
+   Record format . . . : VB  
+   Record length . . . : 255 
+   Block size  . . . . : 4096
+   1st extent tracks . : 1   
+   Secondary tracks  . : 1   
+ 
+ This file contains additional environment settings. Due to the limited size 
+ (245 bytes) it is recommended to use a _CEE_ENVFILE to reference a properties 
+ file in the HFS environment. The example in Figure 1 uses 
+ "/wlmjvm/jspnolimit.txt" as the path. More information can be found here:
+ http://publib.boulder.ibm.com/infocenter/dzichelp/v2r2/index.jsp?topic=/com.ibm
+ .db29.doc.java/db2z_javaroutineruntimeenvironment.htm
+   
+c) The jspnolimit.txt (HFS)
+---------------------------
+ This file resides in your HFS and contains additional environment settings, 
+ like the CLASSPATH, JCC_HOME or JAVA_HOME.
+ 
+ RESET_FREQ=-1:
+  This option is might be required when Java 5.0 or later is used. The JVM
+  need to be run in non-resetable mode to ensure the proper operation of the 
+  DB2 HTTP/REST consumer functions. For more information see: 
+  http://publib.boulder.ibm.com/infocenter/dzichelp/v2r2/topic/com.ibm.db2.doc.j
+  ava/db2z_javaroutineruntimeenvironment.htm 
+  
+  and APAR PK09213:
+  http://www-01.ibm.com/support/docview.wss?uid=swg1PK09213
+ 
+ JVMPROPS:
+  This option refers to yet another properties file where additional JVM startup
+  properties can be specified. 
+
+ CLASSPATH:
+  You can provide additional class path information, e.g. to the JAR file for
+  the DB2 HTTP/REST consumer functions - which reside in restUDF.jar.
+  
+ example of jspnolimit.txt for DB2 V9
+  CLASSPATH=/restUDF/restUDF.jar
+  JAVA_HOME=/usr/lpp/java160/J6.0
+  JCC_HOME=/usr/lpp/db2/devbase_jdbc
+  DB2_BASE=/usr/lpp/db2/devbase_base
+  JVMPROPS=/wlmjvm/jvmprops.txt
+ 
+d) The jvmprops.txt (HFS)
+-------------------------
+ This file can be used to store additional JVM startup properties. For example 
+ the Java key store used to store server certificates for SSL connections or
+ HTTP proxy configurations in case a proxy is supposed to be use.
+
+ example of jvmprops.txt with the SSL key store configuration:
+  -Djavax.net.ssl.keyStore=/wlmjvm/keystore.jks
+  -Djavax.net.ssl.trustStore=/wlmjvm/keystore.jks
+  -Djavax.net.ssl.trustStorePassword=password
+  -Djavax.net.ssl.keyStorePassword=password
+
+ example of a HTTP proxy configuration in jvmprops.txt
+  -Dhttp.proxyHost=myProxyHost.com
+  -Dhttp.proxyPort=8090
+  -Dhttp.proxyUser=user
+  -Dhttp.proxyPassword=secret
+  -Dhttp.nonProxyHosts=*.ibm.com|wikipedia.org|...
+  
+More information about the setup of the Java WLM environment can be found here:
+http://publib.boulder.ibm.com/infocenter/dzichelp/v2r2/index.jsp?topic=/com.ibm.
+db29.doc.java/db2z_javaroutineruntimeenvironment.htm
+
+The Redbook "DB2 9 for z/OS Stored Procedures: Through the CALL and Beyond"
+also provides more details on the WLM configuration for Java-based routines:
+http://www.redbooks.ibm.com/abstracts/sg247604.html?Open
+
+Note: You should always refresh your WLM environment when changing the 
+      configuration.
+
+
+3. Installation of the DB2 HTTP/REST consumer functions
+=======================================================
+
+3.1. Installation of the JAR
+----------------------------
+You can either place the restUDF.jar in your HFS and add the path to the 
+CLASSPATH variable specified in the jspnolimit.txt configuration file or you 
+use the SQLJ.INSTALL_JAR stored procedure to add the jar into your catalog. For 
+more information see: 
+http://publib.boulder.ibm.com/infocenter/dzichelp/v2r2/index.jsp?topic=/com.ibm.
+db29.doc.java/db2z_sqljinstall_jar.htm
+
+Note: You should refresh your WLM environment to pick-up the JAR.
+
+When using SQLJ.INSTALL_JAR to install the restUDF.jar into your system you have
+to change the EXTERNAL NAME option in the DDL statements which create the REST 
+UDFs (see createUDFzOS.sql). The EXTERNAL NAME value has to preclude  the JAR ID 
+which was used with SQLJ.INSTALL_JAR when the retUDF.jar was registered - 
+following this pattern:
+ EXTERNAL NAME <jar_id>:<class name>.<method name>
+For example the EXTERNAL NAME for the urlEncode() function would change to: 
+ EXTERNAL NAME 'RESTUDF:com.ibm.db2.rest.DB2UDFWrapper.urlEncode'
+if 'RESTUDF" was used when the jar was  registered with SQLJ.INSTALL_JAR().
+
+3.2 Executing the DDL to create the UDF signatures
+--------------------------------------------------
+Modify the createUDFzOS.sql script to change the WLM ENVIRONMENT option to the 
+appropriate WLM name which fits your environment. Run createUDFzOS.sql to create 
+the DB2 HTTP/REST consumer function signatures.
+
+
+4. SSL certificate configuration
+================================
+The REST UDFs take advantage of the Java Secure Socket Extension (JSSE) for 
+secure socket layer communication (SSL). SSL communication requires a 
+certificate store on the client on order to store server certificates. The 
+management of that store might depend on the JSSE implementation. More 
+information on the IBM JSSE implementation for z/OS can be found here:
+http://www-03.ibm.com/systems/z/os/zos/tools/java/products/jsse14.html
+
+You may need to add new certificates to the key store which is used by the JVM,
+or you may even need to create your own key store for the usage by the HTTP/REST
+user-defined functions.
+
+Several JSSE implementations use the keytool command to manage the certificate 
+store. More information about the keytool can be found here: 
+http://download.oracle.com/javase/6/docs/technotes/tools/solaris/keytool.html
+
+You may also need to specify several JVM start arguments to specify JSSE 
+parameters - like to location of the key store and the password to be used. 
+Those can be specified in the jvmprops.txt as shown above. 
